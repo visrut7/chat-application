@@ -1,0 +1,68 @@
+Sure, let's break down the intuition behind using `server.listen` instead of `app.listen` and the implications it has in terms of Linux processes and port usage.
+
+### Understanding `app.listen` and `server.listen`
+
+- **`app.listen(port)`**: This method is specific to the Express application. When you call `app.listen(port)`, Express sets up an HTTP server internally and starts listening for incoming HTTP requests on the specified port. This is convenient for simple applications that only need an HTTP server.
+
+- **`server.listen(port)`**: This method is more generic and is used when you have a custom HTTP server (created using Node.js's `http` module) that you want to listen on a specified port. This approach is necessary when you want to integrate other types of servers (like a WebSocket server) with the HTTP server.
+
+### Integrating WebSocket with HTTP Server
+
+When you integrate a WebSocket server with an HTTP server, you need to ensure that both servers are sharing the same underlying network socket (port). This allows the WebSocket server to handle WebSocket upgrade requests on the same port where the HTTP server is handling regular HTTP requests.
+
+Here’s the process flow:
+
+1. **Create an HTTP Server**: Using Node.js's `http` module.
+2. **Attach Express App**: Attach the Express app to the HTTP server.
+3. **Attach WebSocket Server**: Attach the WebSocket server to the same HTTP server.
+4. **Listen on Port**: Have the combined server listen on the specified port.
+
+### Linux Processes and Ports
+
+- **Process and Port**: In Linux, a port is an endpoint of communication in an operating system. Each port is associated with an IP address and a protocol type (TCP or UDP). A process can listen to a port, and when data is received on that port, the operating system directs the data to the corresponding process.
+
+- **Single Port Usage**: A single port can be used by only one process at a time. If you start two separate servers (one for HTTP and one for WebSocket) on the same port, you will get an error because the port is already in use by another process.
+
+- **Shared Server Approach**: By creating a single HTTP server and attaching both the Express app and WebSocket server to it, you ensure that both types of requests (HTTP and WebSocket) are handled by the same process on the same port.
+
+### Visualization of the Setup
+
+Imagine the network stack as layers:
+
+1. **Network Layer**: Receives data packets on a specified port.
+2. **Transport Layer (TCP)**: Manages the connection and data transfer.
+3. **Application Layer (HTTP & WebSocket)**: Handles specific protocols.
+
+When a request comes in on port 3000:
+- **HTTP Request**: The Express app handles it because it's attached to the HTTP server.
+- **WebSocket Upgrade Request**: The WebSocket server handles it, upgrades the connection, and manages further communication over WebSocket.
+
+### Code Implementation
+
+Here’s a simplified breakdown:
+
+1. **Create HTTP Server**:
+    ```typescript
+    const server = http.createServer(app); // 'app' is the Express instance
+    ```
+
+2. **Attach WebSocket Server**:
+    ```typescript
+    const wss = new WebSocket.Server({ server });
+    ```
+
+3. **Listen on Port**:
+    ```typescript
+    server.listen(port, () => {
+      console.log(`Server is running at http://localhost:${port}`);
+    });
+    ```
+
+This setup ensures:
+- One process listens on port 3000.
+- Handles both HTTP requests and WebSocket connections.
+- No port conflicts since everything is managed by the same process.
+
+### Conclusion
+
+Using `server.listen` ensures that both HTTP and WebSocket servers are integrated seamlessly, avoiding port conflicts and ensuring efficient handling of different types of network requests within the same process. This approach leverages the capability of Node.js to handle multiple protocols on the same port, making it ideal for real-time applications that require both HTTP and WebSocket communication.

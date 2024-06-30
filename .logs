@@ -1,0 +1,22 @@
+pnpm create vite chat-application --template react-ts
+
+mkdir backend
+cd backend
+pnpm init
+pnpm install express
+pnpm install -D typescript @types/node @types/express
+pnpm install -D nodemon ts-node
+
+nodemon.json
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "ignore": ["src/**/*.spec.ts"],
+  "exec": "ts-node ./src/main.ts"
+}
+
+
+pnpm i -g wscat
+wscat -c ws://localhost:3000
+>{"type": "user_list", "name": "John"}
+>{"name": "John", "type": "chat_message", "message": "Hello, World!"}
