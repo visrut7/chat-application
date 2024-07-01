@@ -1,3 +1,4 @@
+import "./App.css";
 import React, { useState, useEffect, useRef } from "react";
 
 interface Message {
@@ -61,9 +62,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="page">
       {!joined ? (
-        <form onSubmit={handleJoin}>
+        <form onSubmit={handleJoin} className="join-form">
           <h1>Join Chat</h1>
           <input
             type="text"
@@ -83,6 +84,7 @@ const App: React.FC = () => {
               overflowY: "auto",
               border: "1px solid black",
               padding: "10px",
+              width: "1000px",
             }}
           >
             <h2>Chat</h2>
