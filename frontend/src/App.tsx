@@ -1,94 +1,143 @@
-import { useEffect, useState } from "react";
-import "./App.css";
+import React, { useState, useEffect, useRef } from "react";
 
-function App() {
-  const [name, setName] = useState("");
-  const [users, setUsers] = useState([]);
-  const [message, setMessage] = useState("");
-  const [chat, setChat] = useState<
-    | {
-        name: string;
-        message: string;
-      }[]
-    | null
-  >([]); // Provide an empty array as the default value
-  const [ws, setWs] = useState<WebSocket | null>(null);
+interface Message {
+  name: string;
+  type: string;
+  message: string;
+}
+
+const App: React.FC = () => {
+  const [name, setName] = useState<string>("");
+  const [joined, setJoined] = useState<boolean>(false);
+  const [users, setUsers] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [message, setMessage] = useState<string>("");
+
+  const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:3000", "echo-protocol");
-    websocket.onopen = () => {
-      console.log("Connected to server");
-    };
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      switch (data.type) {
-        case "user_list":
+    if (joined) {
+      ws.current = new WebSocket("ws://localhost:3000");
+
+      ws.current.onopen = () => {
+        console.log("Connected to the server");
+        ws.current?.send(
+          JSON.stringify({ name, type: "user_list", message: "" })
+        );
+      };
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "user_list") {
           setUsers(data.users);
-          break;
-        case "chat_message":
-          setChat((prevChat) => [
-            ...(prevChat ?? []),
-            { name: data.name, message: data.message },
-          ]);
-          break;
-      }
-    };
-    setWs(websocket);
+        } else if (data.type === "chat_message") {
+          setMessages((prevMessages) => [...prevMessages, data]);
+        }
+      };
 
-    return () => websocket.close();
-  }, []);
+      ws.current.onclose = () => {
+        console.log("Disconnected from the server");
+      };
 
-  const joinChat = () => {
-    if (ws) {
-      ws.send(JSON.stringify({ type: "new_user", name }));
+      return () => {
+        ws.current?.close();
+      };
     }
+  }, [joined, name]);
+
+  const handleJoin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setJoined(true);
   };
 
-  const sendMessage = () => {
-    if (ws) {
-      ws.send(JSON.stringify({ type: "chat_message", name, message }));
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (ws.current) {
+      const messageData = { name, type: "chat_message", message };
+      ws.current.send(JSON.stringify(messageData));
       setMessage("");
     }
   };
 
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Enter your name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={joinChat}>Join Chat</button>
-
-      <div>
-        <h3>Connected Users</h3>
-        <ul>
-          {users.map((user) => (
-            <li key={user}>{user}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        <h3>Chat</h3>
-        <div>
-          {chat?.map((chat, index) => (
-            <p key={`${chat.name}-${index}`}>
-              <strong>{chat.name}:</strong> {chat.message}
-            </p>
-          ))}
+      {!joined ? (
+        <form onSubmit={handleJoin}>
+          <h1>Join Chat</h1>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+          />
+          <button type="submit">Join</button>
+        </form>
+      ) : (
+        <div
+          style={{ display: "flex", flexDirection: "column", height: "100vh" }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              border: "1px solid black",
+              padding: "10px",
+            }}
+          >
+            <h2>Chat</h2>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            >
+              {messages.map((msg) => (
+                <div
+                  key={`${msg.name}-${msg.message}`}
+                  style={{ border: "1px solid gray", padding: "5px" }}
+                >
+                  <strong>{msg.name}: </strong>
+                  <span>{msg.message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <form
+            style={{
+              display: "flex",
+              alignItems: "center",
+              borderTop: "1px solid black",
+              padding: "10px",
+            }}
+            onSubmit={handleSendMessage}
+          >
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message"
+              style={{ flex: 1, marginRight: "10px" }}
+            />
+            <button type="submit">Send</button>
+          </form>
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              border: "1px solid black",
+              padding: "10px",
+            }}
+          >
+            <h3>Users</h3>
+            <ul>
+              {users.map((user) => (
+                <li key={user}>{user}</li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <input
-          type="text"
-          placeholder="Enter your message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button onClick={sendMessage}>Send</button>
-      </div>
+      )}
     </div>
   );
-}
+};
 
 export default App;
