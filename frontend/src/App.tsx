@@ -71,6 +71,7 @@ const App: React.FC = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter your name"
+            required
           />
           <button type="submit">Join</button>
         </form>
@@ -117,6 +118,7 @@ const App: React.FC = () => {
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message"
               style={{ flex: 1, marginRight: "10px" }}
+              required
             />
             <button type="submit">Send</button>
           </form>

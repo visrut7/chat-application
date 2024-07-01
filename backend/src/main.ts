@@ -30,7 +30,6 @@ wss.on("connection", (ws: WebSocketClient) => {
 
 const broadcastUserList = () => {
   const users: string[] = Array.from(clients.values());
-  console.log(users);
   const message: string = JSON.stringify({ type: "user_list", users });
   clients.forEach((_, ws: WebSocketClient) => ws.send(message));
 };
