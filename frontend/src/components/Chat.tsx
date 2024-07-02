@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
 
 interface Message {
-  name: string;
+  username: string;
   type: string;
   message: string;
 }
 
 interface ChatProps {
-  name: string;
+  username: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ name }) => {
+const Chat: React.FC<ChatProps> = ({ username }) => {
   const [users, setUsers] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const ws = useRef<WebSocket | null>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (name) {
+    if (username) {
       ws.current = new WebSocket("ws://localhost:3000");
 
       ws.current.onopen = () => {
         console.log("Connected to the server");
         ws.current?.send(
-          JSON.stringify({ name, type: "user_list", message: "" })
+          JSON.stringify({ name: username, type: "user_list", message: "" })
         );
       };
 
@@ -49,13 +49,13 @@ const Chat: React.FC<ChatProps> = ({ name }) => {
         ws.current?.close();
       };
     }
-  }, [name]);
+  }, [username]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (ws.current) {
       const messageData = {
-        name,
+        name: username,
         type: "chat_message",
         message: messageInputRef.current?.value!,
       };
@@ -84,10 +84,10 @@ const Chat: React.FC<ChatProps> = ({ name }) => {
           >
             {messages.map((msg) => (
               <div
-                key={`${msg.name}-${msg.message}`}
+                key={`${msg.username}-${msg.message}`}
                 style={{ border: "1px solid gray", padding: "5px" }}
               >
-                <strong>{msg.name}: </strong>
+                <strong>{msg.username}: </strong>
                 <span>{msg.message}</span>
               </div>
             ))}

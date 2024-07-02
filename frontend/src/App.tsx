@@ -5,14 +5,14 @@ import JoinForm from "./components/JoinForm";
 import Chat from "./components/Chat";
 
 const App: React.FC = () => {
-  const [name, setName] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
 
   return (
     <div className="page">
       <Router>
         <Routes>
-          <Route path="/chat" element={<Chat name={name} />} />
-          <Route path="/" element={<JoinForm setName={setName} />} />
+          <Route path="/chat" element={<Chat username={username} />} />
+          <Route path="/" element={<JoinForm setName={setUsername} />} />
         </Routes>
       </Router>
     </div>
