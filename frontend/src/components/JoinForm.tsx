@@ -1,4 +1,4 @@
-import React from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface JoinFormProps {
@@ -6,7 +6,7 @@ interface JoinFormProps {
 }
 
 const JoinForm: React.FC<JoinFormProps> = ({ setName }) => {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleJoin = (e: React.FormEvent) => {
