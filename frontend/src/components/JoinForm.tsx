@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 interface JoinFormProps {
@@ -6,12 +6,12 @@ interface JoinFormProps {
 }
 
 const JoinForm: React.FC<JoinFormProps> = ({ setName }) => {
-  const [inputName, setInputName] = useState<string>("");
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    setName(inputName);
+    setName(inputRef.current?.value!);
     navigate("/chat");
   };
 
@@ -20,10 +20,10 @@ const JoinForm: React.FC<JoinFormProps> = ({ setName }) => {
       <h1>Join Chat</h1>
       <input
         type="text"
-        value={inputName}
-        onChange={(e) => setInputName(e.target.value)}
         placeholder="Enter your name"
+        ref={inputRef}
         required
+        autoFocus
       />
       <button type="submit">Join</button>
     </form>

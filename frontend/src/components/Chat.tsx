@@ -13,8 +13,8 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ name }) => {
   const [users, setUsers] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [message, setMessage] = useState<string>("");
   const ws = useRef<WebSocket | null>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (name) {
@@ -54,9 +54,13 @@ const Chat: React.FC<ChatProps> = ({ name }) => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (ws.current) {
-      const messageData = { name, type: "chat_message", message };
+      const messageData = {
+        name,
+        type: "chat_message",
+        message: messageInputRef.current?.value!,
+      };
       ws.current.send(JSON.stringify(messageData));
-      setMessage("");
+      messageInputRef.current!.value = "";
     }
   };
 
@@ -100,11 +104,11 @@ const Chat: React.FC<ChatProps> = ({ name }) => {
         >
           <input
             type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            ref={messageInputRef}
             placeholder="Type a message"
             style={{ flex: 1, marginRight: "10px" }}
             required
+            autoFocus
           />
           <button type="submit">Send</button>
         </form>
