@@ -12,7 +12,7 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/chat" element={<Chat username={username} />} />
-          <Route path="/" element={<JoinForm setName={setUsername} />} />
+          <Route path="/" element={<JoinForm setUsername={setUsername} />} />
         </Routes>
       </Router>
     </div>

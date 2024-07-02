@@ -2,16 +2,16 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface JoinFormProps {
-  setName: React.Dispatch<React.SetStateAction<string>>;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const JoinForm: React.FC<JoinFormProps> = ({ setName }) => {
+const JoinForm: React.FC<JoinFormProps> = ({ setUsername }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    setName(inputRef.current?.value!);
+    setUsername(inputRef.current?.value!);
     navigate("/chat");
   };
 
