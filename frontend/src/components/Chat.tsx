@@ -23,7 +23,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       ws.current.onopen = () => {
         console.log("Connected to the server");
         ws.current?.send(
-          JSON.stringify({ name: username, type: "user_list", message: "" })
+          JSON.stringify({ username, type: "user_list", message: "" })
         );
       };
 
@@ -55,7 +55,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     e.preventDefault();
     if (ws.current) {
       const messageData = {
-        name: username,
+        username,
         type: "chat_message",
         message: messageInputRef.current?.value!,
       };

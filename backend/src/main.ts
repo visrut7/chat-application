@@ -13,12 +13,12 @@ const clients: Map<WebSocketClient, string> = new Map();
 
 wss.on("connection", (ws: WebSocketClient) => {
   ws.on("message", (message: string) => {
-    const data: { name: string; type: string; message: string } = JSON.parse(
-      message.toString()
-    );
+    console.log("message", message.toString());
+    const data: { username: string; type: string; message: string } =
+      JSON.parse(message.toString());
     switch (data.type) {
       case "user_list":
-        clients.set(ws, data.name);
+        clients.set(ws, data.username);
         broadcastUserList();
         break;
       case "chat_message":
@@ -35,7 +35,7 @@ const broadcastUserList = () => {
 };
 
 const broadcastMessage = (data: {
-  name: string;
+  username: string;
   type: string;
   message: string;
 }) => {
